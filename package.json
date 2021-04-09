@@ -17,11 +17,18 @@
     "@mikro-orm/core": "^4.5.2",
     "@mikro-orm/migrations": "^4.5.2",
     "@mikro-orm/postgresql": "^4.5.2",
+    "dotenv": "^8.2.0",
     "pg": "^8.5.1"
   },
   "devDependencies": {
     "@types/npm": "^2.0.31",
     "nodemon": "^2.0.7",
     "typescript": "^4.2.4"
+  },
+  "mikro-orm": {
+    "configPaths": [
+      "./src/mikro-orm.config.ts",
+      "./dist/mikro-orm.config.js"
+    ]
   }
 }
