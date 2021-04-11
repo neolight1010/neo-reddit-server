@@ -8,3 +8,5 @@ if (__debug__) {
 export const __dbName__ = process.env.DB_NAME;
 export const __dbUser__ = process.env.DB_USER;
 export const __dbPassword__ = process.env.DB_PASSWORD;
+
+export const __port__ = process.env.PORT;
