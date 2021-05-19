@@ -23,7 +23,8 @@ export class User {
   @Property({ onUpdate: () => new Date() })
   updatedAt: Date = new Date();
 
-  constructor(username: string) {
+  constructor(username: string, password: string) {
     this.username = username;
+    this.password = password;
   }
 }
