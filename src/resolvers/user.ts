@@ -9,17 +9,17 @@ const loginError: UserResponse = { error: "Invalid username or pasword." };
 
 @Resolver()
 export class UserResolver {
-  @Mutation(() => User)
+  @Mutation(() => UserResponse)
   async register(
     @Arg("registerInfo") registerInfo: UsernamePasswordInput,
     @Ctx() { em }: EntityManagerContext
-  ) {
+  ): Promise<UserResponse> {
     const hashedPassword = await hash(registerInfo.password);
 
     const user = new User(registerInfo.username, hashedPassword);
     await em.persistAndFlush(user);
 
-    return user;
+    return { user };
   }
 
   @Mutation(() => UserResponse)
