@@ -52,6 +52,7 @@ async function main() {
 
   // Set up ApolloServer.
   const apolloServer = new ApolloServer({
+    playground: { settings: { "request.credentials": "include" } },
     schema: await buildSchema({
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
