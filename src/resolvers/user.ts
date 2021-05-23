@@ -7,6 +7,12 @@ import { UserResponse } from "../graphql_types/object_types";
 
 const loginError: UserResponse = { error: "Invalid username or pasword." };
 
+declare module "express-session" {
+  interface SessionData {
+    userId: number;
+  }
+}
+
 @Resolver()
 export class UserResolver {
   @Mutation(() => UserResponse)
@@ -37,14 +43,18 @@ export class UserResolver {
   @Mutation(() => UserResponse)
   async login(
     @Arg("loginInfo") loginInfo: UsernamePasswordInput,
-    @Ctx() { em }: EntityManagerContext
+    @Ctx() { em, req }: EntityManagerContext
   ): Promise<UserResponse> {
     const user = await em.findOne(User, { username: loginInfo.username });
 
     if (!user) return loginError;
 
     const validPassword = await verify(user.password, loginInfo.password);
-    if (validPassword) return { user };
+    if (validPassword) {
+      req.session.userId = user.id;
+
+      return { user };
+    }
 
     return loginError;
   }

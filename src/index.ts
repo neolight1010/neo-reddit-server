@@ -36,12 +36,12 @@ async function main() {
       }),
       cookie: {
         maxAge: 5 * 30 * 24 * 60 * 60 * 1000,
-        httpOnly: true,
+        httpOnly: __prod__,
         secure: __prod__,
         sameSite: "lax",
       }, // 5 months.
       saveUninitialized: false,
-      secret: "keyboard cat",
+      secret: "nice secret",
       resave: false,
     })
   );
