@@ -6,6 +6,7 @@ import {
   __dbUser__,
   __debug__,
   __port__,
+  __prod__,
 } from "./constants";
 import express from "express";
 import { Post } from "./entities/Post";
@@ -14,23 +15,53 @@ import { buildSchema } from "type-graphql";
 import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
+import redis from "redis";
+import connectRedis from "connect-redis";
+import session from "express-session";
+import { EntityManagerContext } from "./types";
 
 async function main() {
+  const app = express();
+
+  // Set up ExpressSession and Redis.
+  const RedisStore = connectRedis(session);
+  const redisClient = redis.createClient();
+
+  app.use(
+    session({
+      name: "qid",
+      store: new RedisStore({
+        client: redisClient,
+        disableTouch: true,
+      }),
+      cookie: {
+        maxAge: 5 * 30 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+        secure: __prod__,
+        sameSite: "lax",
+      }, // 5 months.
+      saveUninitialized: false,
+      secret: "keyboard cat",
+      resave: false,
+    })
+  );
+
+  // Set up MikroORM.
   const orm = await MikroORM.init(mikroOrmConfig);
   // await orm.getMigrator().up();
 
-  const app = express();
-
+  // Set up ApolloServer.
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
-    context: () => ({ em: orm.em }),
+    context: ({ req, res }): EntityManagerContext => ({ em: orm.em, req, res }),
   });
 
   apolloServer.applyMiddleware({ app });
 
+  // API endpoints.
   app.get("/", async (_, res) => {
     const posts = await orm.em.find(Post, {});
     res.send(posts);
