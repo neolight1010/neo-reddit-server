@@ -7,6 +7,7 @@ import {
   __debug__,
   __port__,
   __prod__,
+  __sessionSecret__,
 } from "./constants";
 import express from "express";
 import { Post } from "./entities/Post";
@@ -41,7 +42,7 @@ async function main() {
         sameSite: "lax",
       }, // 5 months.
       saveUninitialized: false,
-      secret: "nice secret",
+      secret: __sessionSecret__!,
       resave: false,
     })
   );
