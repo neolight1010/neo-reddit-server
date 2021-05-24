@@ -1,11 +1,13 @@
 import { hash, verify } from "argon2";
 import { User } from "../entities/User";
 import { EntityManagerContext } from "../types";
-import { Arg, Ctx, Mutation, Resolver } from "type-graphql";
+import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { UsernamePasswordInput } from "../graphql_types/input_types";
 import { UserResponse } from "../graphql_types/object_types";
 
 const loginError: UserResponse = { error: "Invalid username or pasword." };
+const noUserError: UserResponse = { error: "User ID not found." };
+const notLoggedInError: UserResponse = { error: "You are not logged in." };
 
 declare module "express-session" {
   interface SessionData {
@@ -15,6 +17,18 @@ declare module "express-session" {
 
 @Resolver()
 export class UserResolver {
+  @Query(() => UserResponse)
+  async me(@Ctx() { em, req }: EntityManagerContext): Promise<UserResponse> {
+    if (req.session.userId) {
+      const user = await em.findOne(User, { id: req.session.userId });
+
+      if (user) return { user };
+      return noUserError;
+    }
+
+    return notLoggedInError;
+  }
+
   @Mutation(() => UserResponse)
   async register(
     @Arg("registerInfo") registerInfo: UsernamePasswordInput,
