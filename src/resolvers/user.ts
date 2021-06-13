@@ -5,9 +5,16 @@ import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { UsernamePasswordInput } from "../graphql_types/input_types";
 import { UserResponse } from "../graphql_types/object_types";
 
-const loginError: UserResponse = { error: "Invalid username or pasword." };
-const noUserError: UserResponse = { error: "User ID not found." };
-const notLoggedInError: UserResponse = { error: "You are not logged in." };
+const loginError: UserResponse = {
+  error: {
+    message: "Invalid username or pasword.",
+    fields: ["username", "password"],
+  },
+};
+const noUserError: UserResponse = { error: { message: "User ID not found." } };
+const notLoggedInError: UserResponse = {
+  error: { message: "You are not logged in." },
+};
 
 declare module "express-session" {
   interface SessionData {
@@ -35,16 +42,29 @@ export class UserResolver {
     @Ctx() { em }: EntityManagerContext
   ): Promise<UserResponse> {
     if (registerInfo.username.length <= 2) {
-      return { error: "Username must have at least 3 characters." };
+      return {
+        error: {
+          message: "Username must have at least 3 characters.",
+          fields: ["username"],
+        },
+      };
     }
 
     if (registerInfo.password.length <= 4) {
-      return { error: "Password must have at least 5 characters." };
+      return {
+        error: {
+          message: "Password must have at least 5 characters.",
+          fields: ["password"],
+        },
+      };
     }
 
     // Check if username is taken.
     const taken = await em.findOne(User, { username: registerInfo.username });
-    if (taken) return { error: "Username is already taken." };
+    if (taken)
+      return {
+        error: { message: "Username is already taken.", fields: ["username"] },
+      };
 
     const hashedPassword = await hash(registerInfo.password);
 
