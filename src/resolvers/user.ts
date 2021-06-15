@@ -43,7 +43,7 @@ export class UserResolver {
   @Mutation(() => UserResponse)
   async register(
     @Arg("registerInfo") registerInfo: UsernamePasswordInput,
-    @Ctx() { em }: EntityManagerContext
+    @Ctx() { em, req }: EntityManagerContext
   ): Promise<UserResponse> {
     if (registerInfo.username.length <= 2) {
       return {
@@ -79,6 +79,10 @@ export class UserResolver {
     const user = new User(registerInfo.username, hashedPassword);
 
     await em.persistAndFlush(user);
+
+    // Login user
+    req.session.userId = user.id;
+
     return { user };
   }
 
