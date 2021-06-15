@@ -61,7 +61,13 @@ async function main() {
     context: ({ req, res }): EntityManagerContext => ({ em: orm.em, req, res }),
   });
 
-  apolloServer.applyMiddleware({ app });
+  apolloServer.applyMiddleware({
+    app,
+    cors: {
+      credentials: true,
+      origin: "http://localhost:3000",
+    },
+  });
 
   // API endpoints.
   app.get("/", async (_, res) => {
