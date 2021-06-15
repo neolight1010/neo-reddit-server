@@ -6,14 +6,14 @@ export class FieldError {
   @Field(() => String)
   message: string;
 
-  @Field(() => [String])
-  fields?: string[];
+  @Field(() => String)
+  field: string;
 }
 
 @ObjectType()
 export class UserResponse {
-  @Field(() => FieldError, { nullable: true })
-  error?: FieldError;
+  @Field(() => [FieldError], { nullable: true })
+  errors?: FieldError[];
 
   @Field(() => User, { nullable: true })
   user?: User;
