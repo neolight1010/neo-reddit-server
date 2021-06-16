@@ -9,7 +9,7 @@ const loginError: UserResponse = {
   errors: [
     {
       message: "Invalid username or pasword.",
-      field: "username",
+      field: "password",
     },
   ],
 };
