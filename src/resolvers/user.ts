@@ -104,4 +104,18 @@ export class UserResolver {
 
     return loginError;
   }
+
+  @Mutation(() => Boolean)
+  async logout(@Ctx() { req, res }: EntityManagerContext): Promise<Boolean> {
+    return new Promise((resolve) => {
+      req.session.destroy((err) => {
+        if (!err) {
+          res.clearCookie("qid");
+          resolve(true);
+        }
+
+        resolve(false);
+      });
+    });
+  }
 }
