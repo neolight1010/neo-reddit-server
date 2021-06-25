@@ -7,6 +7,7 @@ import {
   __debug__,
   __port__,
   __prod__,
+  __sessionCookie__,
   __sessionSecret__,
 } from "./constants";
 import express from "express";
@@ -30,7 +31,7 @@ async function main() {
 
   app.use(
     session({
-      name: "qid",
+      name: __sessionCookie__,
       store: new RedisStore({
         client: redisClient,
         disableTouch: true,

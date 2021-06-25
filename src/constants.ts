@@ -12,3 +12,4 @@ export const __dbUser__ = process.env.DB_USER;
 export const __dbPassword__ = process.env.DB_PASSWORD;
 
 export const __sessionSecret__ = process.env.SESSION_SECRET;
+export const __sessionCookie__ = "qid";

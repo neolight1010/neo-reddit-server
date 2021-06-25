@@ -4,6 +4,7 @@ import { EntityManagerContext } from "../types";
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { UsernamePasswordInput } from "../graphql_types/input_types";
 import { UserResponse } from "../graphql_types/object_types";
+import { __sessionCookie__ } from "../constants";
 
 const loginError: UserResponse = {
   errors: [
@@ -110,7 +111,7 @@ export class UserResolver {
     return new Promise((resolve) => {
       req.session.destroy((err) => {
         if (!err) {
-          res.clearCookie("qid");
+          res.clearCookie(__sessionCookie__);
           resolve(true);
         }
 
