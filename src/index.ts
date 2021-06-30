@@ -21,8 +21,14 @@ import redis from "redis";
 import connectRedis from "connect-redis";
 import session from "express-session";
 import { EntityManagerContext } from "./types";
+import sendEmail from "./utils/sendEmail";
 
 async function main() {
+  sendEmail({
+    to: "bob@bob.com",
+    subject: "Change password?",
+    text: "Hello bob",
+  });
   const app = express();
 
   // Set up ExpressSession and Redis.
