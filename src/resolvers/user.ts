@@ -57,6 +57,17 @@ export class UserResolver {
       };
     }
 
+    if (!registerInfo.email.includes("@")) {
+      return {
+        errors: [
+          {
+            message: "Invalid email.",
+            field: "email",
+          },
+        ],
+      };
+    }
+
     if (registerInfo.password.length <= 4) {
       return {
         errors: [
@@ -77,7 +88,11 @@ export class UserResolver {
 
     const hashedPassword = await hash(registerInfo.password);
 
-    const user = new User(registerInfo.username, hashedPassword);
+    const user = new User(
+      registerInfo.username,
+      registerInfo.email,
+      hashedPassword
+    );
 
     await em.persistAndFlush(user);
 
