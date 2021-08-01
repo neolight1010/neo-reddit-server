@@ -5,6 +5,7 @@ import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { UsernamePasswordInput } from "../graphql_types/input_types";
 import { UserResponse } from "../graphql_types/object_types";
 import { __sessionCookie__ } from "../constants";
+import validateRegister from "../utils/validateRegister";
 
 const loginError: UserResponse = {
   errors: [
@@ -46,38 +47,8 @@ export class UserResolver {
     @Arg("registerInfo") registerInfo: UsernamePasswordInput,
     @Ctx() { em, req }: EntityManagerContext
   ): Promise<UserResponse> {
-    if (registerInfo.username.length <= 2) {
-      return {
-        errors: [
-          {
-            message: "Username must have at least 3 characters.",
-            field: "username",
-          },
-        ],
-      };
-    }
-
-    if (!registerInfo.email.includes("@")) {
-      return {
-        errors: [
-          {
-            message: "Invalid email.",
-            field: "email",
-          },
-        ],
-      };
-    }
-
-    if (registerInfo.password.length <= 4) {
-      return {
-        errors: [
-          {
-            message: "Password must have at least 5 characters.",
-            field: "password",
-          },
-        ],
-      };
-    }
+    const validation = validateRegister(registerInfo);
+    if (validation) return validation;
 
     // Check if username is taken.
     const taken = await em.findOne(User, { username: registerInfo.username });
