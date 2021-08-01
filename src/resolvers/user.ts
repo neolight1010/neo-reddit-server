@@ -104,14 +104,15 @@ export class UserResolver {
 
   @Mutation(() => UserResponse)
   async login(
-    @Arg("loginInfo") loginInfo: UsernamePasswordInput,
+    @Arg("username") username: string,
+    @Arg("password") password: string,
     @Ctx() { em, req }: EntityManagerContext
   ): Promise<UserResponse> {
-    const user = await em.findOne(User, { username: loginInfo.username });
+    const user = await em.findOne(User, { username: username });
 
     if (!user) return loginError;
 
-    const validPassword = await verify(user.password, loginInfo.password);
+    const validPassword = await verify(user.password, password);
     if (validPassword) {
       req.session.userId = user.id;
 
