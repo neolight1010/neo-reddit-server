@@ -48,7 +48,7 @@ export class UserResolver {
     @Ctx() { em, req }: EntityManagerContext
   ): Promise<UserResponse> {
     const errors = validateRegister(registerInfo);
-    if (errors.length == 0) return { errors };
+    if (errors.length > 0) return { errors };
 
     // Check if username is taken.
     const usernameTaken = await em.findOne(User, {
