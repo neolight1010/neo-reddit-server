@@ -51,10 +51,19 @@ export class UserResolver {
     if (errors.length == 0) return { errors };
 
     // Check if username is taken.
-    const taken = await em.findOne(User, { username: registerInfo.username });
-    if (taken)
+    const usernameTaken = await em.findOne(User, {
+      username: registerInfo.username,
+    });
+    if (usernameTaken)
       return {
         errors: [{ message: "Username is already taken.", field: "username" }],
+      };
+
+    // Check if username is taken.
+    const emailTaken = await em.findOne(User, { email: registerInfo.email });
+    if (emailTaken)
+      return {
+        errors: [{ message: "Email is already taken.", field: "email" }],
       };
 
     const hashedPassword = await hash(registerInfo.password);
