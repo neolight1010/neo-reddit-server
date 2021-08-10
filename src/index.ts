@@ -17,7 +17,7 @@ import { buildSchema } from "type-graphql";
 import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
-import redis from "redis";
+import Redis from "ioredis";
 import connectRedis from "connect-redis";
 import session from "express-session";
 import { EntityManagerContext } from "./types";
@@ -33,7 +33,7 @@ async function main() {
 
   // Set up ExpressSession and Redis.
   const RedisStore = connectRedis(session);
-  const redisClient = redis.createClient();
+  const redisClient = new Redis();
 
   app.use(
     session({
@@ -65,7 +65,12 @@ async function main() {
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
-    context: ({ req, res }): EntityManagerContext => ({ em: orm.em, req, res }),
+    context: ({ req, res }): EntityManagerContext => ({
+      em: orm.em,
+      req,
+      res,
+      redis: redisClient,
+    }),
   });
 
   apolloServer.applyMiddleware({

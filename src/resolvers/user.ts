@@ -4,8 +4,10 @@ import { EntityManagerContext } from "../types";
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { UsernamePasswordInput } from "../graphql_types/input_types";
 import { UserResponse } from "../graphql_types/object_types";
-import { __sessionCookie__ } from "../constants";
+import { FORGOT_PASSWORD_PREFIX, __sessionCookie__ } from "../constants";
 import validateRegister from "../utils/validateRegister";
+import sendEmail from "../utils/sendEmail";
+import { v4 } from "uuid";
 
 const loginError: UserResponse = {
   errors: [
@@ -40,6 +42,38 @@ export class UserResolver {
     }
 
     return notLoggedInError;
+  }
+
+  /**
+   * Returns true if the email was sent.
+   *
+   * If the email was not sent, it may be because the given
+   * email doesn't exist in the database.
+   */
+  @Mutation(() => Boolean, {
+    description: "Returns true if the reset password email was sent.",
+  })
+  async forgotPassword(
+    @Ctx() { em, redis }: EntityManagerContext,
+    @Arg("email") email: string
+  ): Promise<Boolean> {
+    const user = await em.findOne(User, { email });
+    if (!user) return false;
+
+    const token = v4();
+    await redis.set(
+      FORGOT_PASSWORD_PREFIX + token,
+      user.id,
+      "ex",
+      1000 * 60 * 60 * 24 * 3
+    );
+
+    const resetPasswordURL = `http://localhost:3000/change-password/${token}`;
+    const anchorTag = `<a href=${resetPasswordURL}>Reset Password</a>`;
+
+    await sendEmail({ to: email, html: anchorTag });
+
+    return true;
   }
 
   @Mutation(() => UserResponse)
