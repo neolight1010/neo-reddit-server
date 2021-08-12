@@ -1,9 +1,7 @@
-import { UsernamePasswordInput } from "../graphql_types/input_types";
-import { FieldError } from "../graphql_types/object_types";
+import {UsernamePasswordInput} from "../graphql_types/input_types";
+import {FieldError} from "../graphql_types/object_types";
+import validatePassword from "./validatePassword"
 
-/*
- * Returns a UserResponse error if registerInfo is invalid.
- */
 export default function validateRegister(
   registerInfo: UsernamePasswordInput
 ): FieldError[] {
@@ -24,12 +22,7 @@ export default function validateRegister(
     });
   }
 
-  if (registerInfo.password.length <= 4) {
-    errors.push({
-      message: "Password must have at least 5 characters.",
-      field: "password",
-    });
-  }
+  errors.concat(validatePassword(registerInfo.password));
 
   return errors;
 }
