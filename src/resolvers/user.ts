@@ -91,7 +91,8 @@ export class UserResolver {
       };
     }
 
-    const userId = await redis.get(FORGOT_PASSWORD_PREFIX + token);
+    const tokenRedisKey = FORGOT_PASSWORD_PREFIX + token;
+    const userId = await redis.get(tokenRedisKey);
     if (!userId)
       return {
         errors: [
@@ -118,6 +119,7 @@ export class UserResolver {
     user.password = hashedPassword;
 
     await em.persistAndFlush(user);
+    await redis.del(tokenRedisKey);
     return {user};
   }
 
