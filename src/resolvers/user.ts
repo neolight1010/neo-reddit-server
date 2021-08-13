@@ -85,7 +85,7 @@ export class UserResolver {
   ): Promise<UserResponse> {
     const passwordErrors = validatePassword(newPassword);
 
-    if (passwordErrors) {
+    if (passwordErrors.length > 0) {
       return {
         errors: passwordErrors
       };
