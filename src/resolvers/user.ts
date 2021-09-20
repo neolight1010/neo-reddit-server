@@ -46,6 +46,7 @@ export class UserResolver {
   }
 
   /**
+   * Sends an email with a link to reset account password.
    * Returns true if the email was sent.
    *
    * If the email was not sent, it may be because the given
