@@ -1,5 +1,3 @@
-import { MikroORM } from "@mikro-orm/core";
-import mikroOrmConfig from "./mikro-orm.config";
 import {
   __dbName__,
   __dbPassword__,
@@ -20,7 +18,9 @@ import { UserResolver } from "./resolvers/user";
 import Redis from "ioredis";
 import connectRedis from "connect-redis";
 import session from "express-session";
-import { EntityManagerContext } from "./types";
+import { RegularContext } from "./types";
+import { createConnection } from "typeorm";
+import { User } from "./entities/User";
 
 async function main() {
   const app = express();
@@ -48,9 +48,16 @@ async function main() {
     })
   );
 
-  // Set up MikroORM.
-  const orm = await MikroORM.init(mikroOrmConfig);
-  // await orm.getMigrator().up();
+  // Set up TypeORM
+  await createConnection({
+    type: "postgres",
+    database: __dbName__,
+    username: __dbUser__,
+    password: __dbPassword__,
+    logging: true,
+    synchronize: __debug__,
+    entities: [User, Post],
+  });
 
   // Set up ApolloServer.
   const apolloServer = new ApolloServer({
@@ -59,8 +66,7 @@ async function main() {
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
-    context: ({ req, res }): EntityManagerContext => ({
-      em: orm.em,
+    context: ({ req, res }): RegularContext => ({
       req,
       res,
       redis: redisClient,
@@ -73,12 +79,6 @@ async function main() {
       credentials: true,
       origin: "http://localhost:3000",
     },
-  });
-
-  // API endpoints.
-  app.get("/", async (_, res) => {
-    const posts = await orm.em.find(Post, {});
-    res.send(posts);
   });
 
   app.listen(__port__, () => {

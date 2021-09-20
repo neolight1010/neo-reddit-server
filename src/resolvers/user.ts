@@ -1,6 +1,5 @@
 import { hash, verify } from "argon2";
 import { User } from "../entities/User";
-import { EntityManagerContext } from "../types";
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { UsernamePasswordInput } from "../graphql_types/input_types";
 import { UserResponse } from "../graphql_types/object_types";
@@ -9,6 +8,7 @@ import validateRegister from "../utils/validateRegister";
 import sendEmail from "../utils/sendEmail";
 import { v4 } from "uuid";
 import validatePassword from "../utils/validatePassword";
+import { RegularContext } from "../types";
 
 const loginError: UserResponse = {
   errors: [
@@ -34,9 +34,9 @@ declare module "express-session" {
 @Resolver()
 export class UserResolver {
   @Query(() => UserResponse)
-  async me(@Ctx() { em, req }: EntityManagerContext): Promise<UserResponse> {
+  async me(@Ctx() { req }: RegularContext): Promise<UserResponse> {
     if (req.session.userId) {
-      const user = await em.findOne(User, { id: req.session.userId });
+      const user = await User.findOne(req.session.userId);
 
       if (user) return { user };
       return noUserError;
@@ -56,10 +56,10 @@ export class UserResolver {
     description: "Returns true if the reset password email was sent.",
   })
   async forgotPassword(
-    @Ctx() { em, redis }: EntityManagerContext,
+    @Ctx() { redis }: RegularContext,
     @Arg("email") email: string
   ): Promise<Boolean> {
-    const user = await em.findOne(User, { email });
+    const user = await User.findOne({ where: { email } });
     if (!user) return false;
 
     const token = v4();
@@ -82,7 +82,7 @@ export class UserResolver {
   async changePassword(
     @Arg("token") token: string,
     @Arg("newPassword") newPassword: string,
-    @Ctx() { em, redis }: EntityManagerContext
+    @Ctx() { redis }: RegularContext
   ): Promise<UserResponse> {
     const passwordErrors = validatePassword(newPassword);
 
@@ -104,7 +104,8 @@ export class UserResolver {
         ],
       };
 
-    const user = await em.findOne(User, { id: parseInt(userId) });
+    const userIdNumber = parseInt(userId);
+    const user = await User.findOne(userIdNumber);
 
     if (!user)
       return {
@@ -117,9 +118,9 @@ export class UserResolver {
       };
 
     const hashedPassword = await hash(newPassword);
-    user.password = hashedPassword;
 
-    await em.persistAndFlush(user);
+    await User.update({ id: userIdNumber }, { password: hashedPassword });
+
     await redis.del(tokenRedisKey);
     return { user };
   }
@@ -127,28 +128,29 @@ export class UserResolver {
   @Mutation(() => UserResponse)
   async register(
     @Arg("registerInfo") registerInfo: UsernamePasswordInput,
-    @Ctx() { em, req }: EntityManagerContext
+    @Ctx() { req }: RegularContext
   ): Promise<UserResponse> {
     const errors = validateRegister(registerInfo);
     if (errors.length > 0) return { errors };
 
+    const { username, email, password } = registerInfo;
+
     // Check if username is taken.
-    const usernameTaken = await em.findOne(User, {
-      username: registerInfo.username,
-    });
-    if (usernameTaken)
+    const usernameTaken = await User.findOne({ where: { username } });
+    if (usernameTaken) {
       return {
         errors: [{ message: "Username is already taken.", field: "username" }],
       };
+    }
 
     // Check if username is taken.
-    const emailTaken = await em.findOne(User, { email: registerInfo.email });
+    const emailTaken = await User.findOne({ where: { email } });
     if (emailTaken)
       return {
         errors: [{ message: "Email is already taken.", field: "email" }],
       };
 
-    const hashedPassword = await hash(registerInfo.password);
+    const hashedPassword = await hash(password);
 
     const user = new User(
       registerInfo.username,
@@ -156,7 +158,7 @@ export class UserResolver {
       hashedPassword
     );
 
-    await em.persistAndFlush(user);
+    await user.save();
 
     // Login user
     req.session.userId = user.id;
@@ -168,9 +170,9 @@ export class UserResolver {
   async login(
     @Arg("username") username: string,
     @Arg("password") password: string,
-    @Ctx() { em, req }: EntityManagerContext
+    @Ctx() { req }: RegularContext
   ): Promise<UserResponse> {
-    const user = await em.findOne(User, { username: username });
+    const user = await User.findOne({ username });
 
     if (!user) return loginError;
 
@@ -185,7 +187,7 @@ export class UserResolver {
   }
 
   @Mutation(() => Boolean)
-  async logout(@Ctx() { req, res }: EntityManagerContext): Promise<Boolean> {
+  async logout(@Ctx() { req, res }: RegularContext): Promise<Boolean> {
     return new Promise((resolve) => {
       req.session.destroy((err) => {
         if (!err) {

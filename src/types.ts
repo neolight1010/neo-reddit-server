@@ -1,9 +1,7 @@
-import { EntityManager, IDatabaseDriver, Connection } from "@mikro-orm/core";
 import { Request, Response } from "express";
 import Redis from "ioredis";
 
-export type EntityManagerContext = {
-  em: EntityManager<any> & EntityManager<IDatabaseDriver<Connection>>;
+export type RegularContext = {
   req: Request;
   res: Response;
   redis: Redis.Redis;
