@@ -29,23 +29,22 @@ export class Post extends BaseEntity {
   @Column({ type: "int", default: 0 })
   points!: number;
 
-  @Field()
-  @Column()
-  authorId: number;
-
+  @Field(() => User)
   @ManyToOne(() => User, (user) => user.posts)
-  author: User;
+  author!: User;
 
   @Field()
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @Field()
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 
-  constructor(title: string) {
+  constructor(title: string, text: string, author: User) {
     super();
     this.title = title;
+    this.text = text;
+    this.author = author;
   }
 }
