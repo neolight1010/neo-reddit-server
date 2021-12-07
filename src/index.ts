@@ -1,10 +1,12 @@
 import {
+  __dbHost__,
   __dbName__,
   __dbPassword__,
   __dbUser__,
   __debug__,
   __port__,
   __prod__,
+  __redisHost__,
   __sessionCookie__,
   __sessionSecret__,
 } from "./constants";
@@ -27,7 +29,7 @@ async function main() {
 
   // Set up ExpressSession and Redis.
   const RedisStore = connectRedis(session);
-  const redisClient = new Redis();
+  const redisClient = new Redis({ host: __redisHost__ });
 
   app.use(
     session({
@@ -51,6 +53,7 @@ async function main() {
   // Set up TypeORM
   await createConnection({
     type: "postgres",
+    host: __dbHost__,
     database: __dbName__,
     username: __dbUser__,
     password: __dbPassword__,
