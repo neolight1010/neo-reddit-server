@@ -18,11 +18,11 @@ export class PostResolver {
   @Query(() => [Post])
   async posts(
     /**The limit will be capped at 50.*/
-    @Arg("limit", () => Int, { nullable: true }) limit: number,
+    @Arg("limit", () => Int, { nullable: true }) limit?: number,
     /**All posts fetched will be older than the cursor's date.*/
     @Arg("cursor", () => Date, { nullable: true }) cursor?: Date
   ): Promise<Post[]> {
-    limit = Math.min(limit, 50);
+    limit = limit ? Math.min(limit, 50) : 50;
 
     return await Post.find({
       where: cursor
