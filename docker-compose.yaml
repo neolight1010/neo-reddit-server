@@ -32,6 +32,8 @@ services:
       - redis
     ports:
       - "4000:4000"
+    volumes:
+      - .:/usr/src/app
 
 volumes:
   neo-reddit-db:
