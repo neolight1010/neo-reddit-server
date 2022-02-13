@@ -2,8 +2,6 @@ import { Post } from "../entities/Post";
 import {
   Arg,
   Ctx,
-  Field,
-  InputType,
   Int,
   Mutation,
   Query,
@@ -13,15 +11,6 @@ import {
 import { RegularContext } from "../types";
 import { User } from "../entities/User";
 import { isLoggedIn } from "../middleware/isLoggedIn";
-
-@InputType()
-class CreatePostInput {
-  @Field()
-  title: string;
-
-  @Field()
-  text: string;
-}
 
 @Resolver()
 export class PostResolver {
@@ -38,7 +27,8 @@ export class PostResolver {
   @UseMiddleware(isLoggedIn)
   @Mutation(() => Post)
   async createPost(
-    @Arg("input") { title, text }: CreatePostInput,
+    @Arg("title") title: string,
+    @Arg("text") text: string,
     @Ctx() { req }: RegularContext
   ): Promise<Post> {
     const user = await User.findOne(req.session.userId);
