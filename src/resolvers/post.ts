@@ -11,12 +11,28 @@ import {
 import { RegularContext } from "../types";
 import { User } from "../entities/User";
 import { isLoggedIn } from "../middleware/isLoggedIn";
+import { LessThan } from "typeorm";
 
 @Resolver()
 export class PostResolver {
   @Query(() => [Post])
-  async posts(): Promise<Post[]> {
-    return await Post.find();
+  async posts(
+    /**The limit will be capped at 50.*/
+    @Arg("limit", () => Int, { nullable: true }) limit: number,
+    /**All posts fetched will be older than the cursor's date.*/
+    @Arg("cursor", () => Date, { nullable: true }) cursor?: Date
+  ): Promise<Post[]> {
+    limit = Math.min(limit, 50);
+
+    return await Post.find({
+      where: cursor
+        ? {
+            createdAt: LessThan(cursor),
+          }
+        : undefined,
+      order: { createdAt: "DESC" },
+      take: limit,
+    });
   }
 
   @Query(() => Post, { nullable: true })
