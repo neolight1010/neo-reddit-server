@@ -23,6 +23,7 @@ import session from "express-session";
 import { RegularContext } from "./types";
 import { createConnection } from "typeorm";
 import { User } from "./entities/User";
+import { join } from "path";
 
 async function main() {
   const app = express();
@@ -51,7 +52,7 @@ async function main() {
   );
 
   // Set up TypeORM
-  await createConnection({
+  const conn = await createConnection({
     type: "postgres",
     host: __dbHost__,
     database: __dbName__,
@@ -60,7 +61,10 @@ async function main() {
     logging: true,
     synchronize: __debug__,
     entities: [User, Post],
+    migrations: [join(__dirname, "migrations", "*")]
   });
+
+  await conn.runMigrations()
 
   // Set up ApolloServer.
   const apolloServer = new ApolloServer({
