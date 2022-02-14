@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc-watch --onSuccess \"nodemon dist/index.js\"",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "typeorm": "typeorm"
   },
   "keywords": [],
   "author": "",
