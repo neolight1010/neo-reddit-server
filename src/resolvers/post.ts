@@ -2,10 +2,13 @@ import { Post } from "../entities/Post";
 import {
   Arg,
   Ctx,
+  FieldResolver,
   Int,
   Mutation,
   Query,
   Resolver,
+  ResolverInterface,
+  Root,
   UseMiddleware,
 } from "type-graphql";
 import { RegularContext } from "../types";
@@ -13,8 +16,13 @@ import { User } from "../entities/User";
 import { isLoggedIn } from "../middleware/isLoggedIn";
 import { LessThan } from "typeorm";
 
-@Resolver()
-export class PostResolver {
+@Resolver(() => Post)
+export class PostResolver implements ResolverInterface<Post> {
+  @FieldResolver()
+  _textSnippetField(@Root() post: Post) {
+    return post.text.slice(0, 47) + "...";
+  }
+
   @Query(() => [Post])
   async posts(
     /**The limit will be capped at 50.*/

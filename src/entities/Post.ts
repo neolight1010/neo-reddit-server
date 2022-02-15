@@ -25,6 +25,9 @@ export class Post extends BaseEntity {
   @Column()
   text!: string;
 
+  @Field({ name: "textSnippet" })
+  _textSnippetField!: string;
+
   @Field()
   @Column({ type: "int", default: 0 })
   points!: number;
