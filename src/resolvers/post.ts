@@ -2,9 +2,11 @@ import { Post } from "../entities/Post";
 import {
   Arg,
   Ctx,
+  Field,
   FieldResolver,
   Int,
   Mutation,
+  ObjectType,
   Query,
   Resolver,
   ResolverInterface,
@@ -16,6 +18,15 @@ import { User } from "../entities/User";
 import { isLoggedIn } from "../middleware/isLoggedIn";
 import { LessThan } from "typeorm";
 
+@ObjectType()
+class PaginatedPosts {
+  @Field(() => [Post])
+  posts: Post[]
+
+  @Field()
+  hasMore: boolean;
+}
+
 @Resolver(() => Post)
 export class PostResolver implements ResolverInterface<Post> {
   @FieldResolver()
@@ -23,24 +34,29 @@ export class PostResolver implements ResolverInterface<Post> {
     return post.text.slice(0, 47) + "...";
   }
 
-  @Query(() => [Post])
+  @Query(() => PaginatedPosts)
   async posts(
     /**The limit will be capped at 50.*/
     @Arg("limit", () => Int, { nullable: true }) limit?: number,
     /**All posts fetched will be older than the cursor's date.*/
     @Arg("cursor", () => Date, { nullable: true }) cursor?: Date
-  ): Promise<Post[]> {
+  ): Promise<PaginatedPosts> {
     limit = limit ? Math.min(limit, 50) : 50;
 
-    return await Post.find({
+    const posts = await Post.find({
       where: cursor
         ? {
             createdAt: LessThan(cursor),
           }
         : undefined,
       order: { createdAt: "DESC" },
-      take: limit,
+      take: limit + 1, // Fetch one more post.
     });
+
+    return {
+      posts: posts.slice(0, limit), // Slice to get only what was requested.
+      hasMore: posts.length === limit + 1,
+    }
   }
 
   @Query(() => Post, { nullable: true })
