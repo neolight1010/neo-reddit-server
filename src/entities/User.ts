@@ -29,7 +29,7 @@ export class User extends BaseEntity {
   email!: string;
 
   @OneToMany(() => Post, (post) => post.author)
-  posts: Post[];
+  posts: Promise<Post[]>;
 
   @Field()
   @CreateDateColumn()

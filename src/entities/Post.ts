@@ -34,7 +34,7 @@ export class Post extends BaseEntity {
 
   @Field(() => User)
   @ManyToOne(() => User, (user) => user.posts)
-  author!: User;
+  author!: Promise<User>;
 
   @Field()
   @CreateDateColumn()
@@ -48,6 +48,6 @@ export class Post extends BaseEntity {
     super();
     this.title = title;
     this.text = text;
-    this.author = author;
+    this.author = Promise.resolve(author);
   }
 }
