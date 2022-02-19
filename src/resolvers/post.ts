@@ -34,6 +34,11 @@ export class PostResolver implements ResolverInterface<Post> {
     return post.text.slice(0, 47) + "...";
   }
 
+  @FieldResolver()
+  async _authorField(@Root() post: Post) {
+    return await post.author;
+  }
+
   @Query(() => PaginatedPosts)
   async posts(
     /**The limit will be capped at 50.*/

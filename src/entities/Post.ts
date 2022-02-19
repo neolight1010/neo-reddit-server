@@ -32,9 +32,11 @@ export class Post extends BaseEntity {
   @Column({ type: "int", default: 0 })
   points!: number;
 
-  @Field(() => User)
   @ManyToOne(() => User, (user) => user.posts)
   author!: Promise<User>;
+
+  @Field(() => User, { name: "author" })
+  _authorField!: User;
 
   @Field()
   @CreateDateColumn()
