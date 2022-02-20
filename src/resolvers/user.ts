@@ -47,6 +47,14 @@ export class UserResolver implements ResolverInterface<User> {
         return await user.posts;
     }
 
+    @FieldResolver()
+    _emailField(@Root() user: User, @Ctx() { req }: RegularContext) {
+        if (req.session.userId === user.id)
+            return user.email;
+        
+        return ""
+    }
+
     @Query(() => UserResponse)
     async me(@Ctx() { req }: RegularContext): Promise<UserResponse> {
         if (req.session.userId) {
