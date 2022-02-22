@@ -46,10 +46,12 @@ export class Post extends BaseEntity {
   @UpdateDateColumn()
   updatedAt!: Date;
 
-  constructor(title: string, text: string, author: User) {
+  constructor(title: string, text: string, author?: User) {
     super();
     this.title = title;
     this.text = text;
-    this.author = Promise.resolve(author);
+
+    if (author)
+      this.author = Promise.resolve(author);
   }
 }
