@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import {
   __dbHost__,
   __dbName__,
