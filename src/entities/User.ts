@@ -4,11 +4,13 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
 import { Post } from "./Post";
+import { Vote } from "./Vote";
 
 @ObjectType()
 @Entity()
@@ -34,7 +36,10 @@ export class User extends BaseEntity {
   posts!: Promise<Post[]>;
 
   @Field(() => [Post], { name: "posts" })
-  _postsField!: Post[]
+  _postsField!: Post[];
+
+  @ManyToMany(() => Vote, (upvote) => upvote.users)
+  upvotes!: Promise<Vote[]>;
 
   @Field()
   @CreateDateColumn()

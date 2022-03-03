@@ -5,9 +5,11 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { Vote } from "./Vote";
 import { User } from "./User";
 
 @ObjectType()
@@ -38,6 +40,9 @@ export class Post extends BaseEntity {
   @Field(() => User, { name: "author" })
   _authorField!: User;
 
+  @OneToMany(() => Vote, (upvote) => upvote.post)
+  upvotes!: Promise<Vote[]>;
+
   @Field()
   @CreateDateColumn()
   createdAt!: Date;
@@ -51,7 +56,6 @@ export class Post extends BaseEntity {
     this.title = title;
     this.text = text;
 
-    if (author)
-      this.author = Promise.resolve(author);
+    if (author) this.author = Promise.resolve(author);
   }
 }

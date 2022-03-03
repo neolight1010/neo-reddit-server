@@ -25,6 +25,7 @@ import { RegularContext } from "./types";
 import { createConnection } from "typeorm";
 import { User } from "./entities/User";
 import { join } from "path";
+import { Vote } from "./entities/Vote";
 
 async function main() {
   const app = express();
@@ -61,11 +62,11 @@ async function main() {
     password: __dbPassword__,
     logging: true,
     synchronize: __debug__,
-    entities: [User, Post],
-    migrations: [join(__dirname, "migrations", "*")]
+    entities: [User, Post, Vote],
+    migrations: [join(__dirname, "migrations", "*")],
   });
 
-  await conn.runMigrations()
+  await conn.runMigrations();
 
   // Set up ApolloServer.
   const apolloServer = new ApolloServer({
