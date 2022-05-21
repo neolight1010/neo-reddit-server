@@ -2,8 +2,6 @@ import {
   BaseEntity,
   Column,
   Entity,
-  JoinTable,
-  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
@@ -23,9 +21,8 @@ export class Vote extends BaseEntity {
   @Column({type: "enum", enum: VoteDirection})
   direction!: VoteDirection;
 
-  @ManyToMany(() => User, (user) => user.upvotes)
-  @JoinTable()
-  users!: Promise<User[]>;
+  @ManyToOne(() => User, (user) => user.votes)
+  user!: Promise<User>;
 
   @ManyToOne(() => Post, (post) => post.upvotes)
   post!: Promise<Post>;

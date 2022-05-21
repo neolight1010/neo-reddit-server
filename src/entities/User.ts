@@ -38,8 +38,8 @@ export class User extends BaseEntity {
   @Field(() => [Post], { name: "posts" })
   _postsField!: Post[];
 
-  @ManyToMany(() => Vote, (upvote) => upvote.users)
-  upvotes!: Promise<Vote[]>;
+  @OneToMany(() => Vote, (vote) => vote.user)
+  votes!: Promise<Vote[]>;
 
   @Field()
   @CreateDateColumn()
