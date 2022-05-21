@@ -40,7 +40,7 @@ export class Post extends BaseEntity {
   @Field(() => User, { name: "author" })
   _authorField!: User;
 
-  @OneToMany(() => Vote, (upvote) => upvote.post)
+  @OneToMany(() => Vote, (vote) => vote.post)
   upvotes!: Promise<Vote[]>;
 
   @Field()
