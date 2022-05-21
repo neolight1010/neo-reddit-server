@@ -4,6 +4,7 @@ import {
   Ctx,
   Field,
   FieldResolver,
+  ID,
   Int,
   Mutation,
   ObjectType,
@@ -17,6 +18,7 @@ import { RegularContext } from "../types";
 import { User } from "../entities/User";
 import { isLoggedIn } from "../middleware/isLoggedIn";
 import { LessThan } from "typeorm";
+import {Vote, VoteDirection} from "../entities/Vote";
 
 @ObjectType()
 class PaginatedPosts {
@@ -61,7 +63,7 @@ export class PostResolver implements ResolverInterface<Post> {
     return {
       posts: posts.slice(0, limit), // Slice to get only what was requested.
       hasMore: posts.length === limit + 1,
-    }
+    };
   }
 
   @Query(() => Post, { nullable: true })
@@ -99,6 +101,24 @@ export class PostResolver implements ResolverInterface<Post> {
   @Mutation(() => Boolean, { nullable: true })
   async deletePost(@Arg("id", () => Int) id: number): Promise<boolean> {
     await Post.delete({ id });
+    return true;
+  }
+
+  @UseMiddleware(isLoggedIn)
+  @Mutation(() => Boolean)
+  async vote(
+    @Arg("postId", () => ID) postId: string,
+    @Arg("direction", () => VoteDirection) direction: VoteDirection,
+    @Ctx() { req }: RegularContext
+  ): Promise<boolean> {
+    const { userId } = req.session;
+
+    await Vote.insert({
+      post: () => postId,
+      user: () => userId!.toString(),
+      direction,
+    });
+
     return true;
   }
 }
