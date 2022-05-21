@@ -32,6 +32,6 @@ export class Vote extends BaseEntity {
   @ManyToOne(() => User, (user) => user.votes)
   user!: Promise<User>;
 
-  @ManyToOne(() => Post, (post) => post.upvotes)
+  @ManyToOne(() => Post, (post) => post.votes)
   post!: Promise<Post>;
 }
