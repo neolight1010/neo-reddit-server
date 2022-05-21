@@ -119,6 +119,12 @@ export class PostResolver implements ResolverInterface<Post> {
       direction,
     });
 
+    const value = direction == VoteDirection.UP ? 1 : -1;
+
+    await Post.update(postId, {
+      points: () => `points + ${value}`,
+    })
+
     return true;
   }
 }
