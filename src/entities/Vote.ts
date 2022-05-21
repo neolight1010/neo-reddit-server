@@ -1,3 +1,4 @@
+import {Field, ObjectType, registerEnumType} from "type-graphql";
 import {
   BaseEntity,
   Column,
@@ -13,11 +14,18 @@ export enum VoteDirection {
   DOWN,
 }
 
+registerEnumType(VoteDirection, {
+  name: "VoteDirection",
+})
+
+@ObjectType()
 @Entity()
 export class Vote extends BaseEntity {
+  @Field()
   @PrimaryGeneratedColumn()
   id!: string;
 
+  @Field(() => VoteDirection)
   @Column({type: "enum", enum: VoteDirection})
   direction!: VoteDirection;
 
