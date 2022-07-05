@@ -104,13 +104,17 @@ export class PostResolver implements ResolverInterface<Post> {
     return true;
   }
 
+  /**
+   * Performs a vote with the given direction and returns the new number of
+   * points of the post.
+   */
   @UseMiddleware(isLoggedIn)
-  @Mutation(() => Boolean)
+  @Mutation(() => Int)
   async vote(
     @Arg("postId", () => ID) postId: string,
     @Arg("direction", () => VoteDirection) direction: VoteDirection,
     @Ctx() { req }: RegularContext
-  ): Promise<boolean> {
+  ): Promise<number> {
     const { userId } = req.session;
 
     await Vote.insert({
@@ -121,10 +125,17 @@ export class PostResolver implements ResolverInterface<Post> {
 
     const value = direction == VoteDirection.UP ? 1 : -1;
 
-    await Post.update(postId, {
-      points: () => `points + ${value}`,
-    })
+    const post = await Post.findOne(postId);
 
-    return true;
+    if (post === undefined) {
+      throw Error("Invalid postId");
+    }
+
+    const newPoints = post.points + value; 
+
+    post.points = newPoints;
+    post.save();
+
+    return newPoints;
   }
 }
