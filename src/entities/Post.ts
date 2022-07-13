@@ -9,7 +9,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { Vote } from "./Vote";
+import { Vote, VoteDirection } from "./Vote";
 import { User } from "./User";
 
 @ObjectType()
@@ -30,9 +30,8 @@ export class Post extends BaseEntity {
   @Field({ name: "textSnippet" })
   _textSnippetField!: string;
 
-  @Field()
-  @Column({ type: "int", default: 0 })
-  points!: number;
+  @Field({ name: "points" })
+  _pointsField!: number;
 
   @ManyToOne(() => User, (user) => user.posts)
   author!: Promise<User>;
@@ -57,5 +56,17 @@ export class Post extends BaseEntity {
     this.text = text;
 
     if (author) this.author = Promise.resolve(author);
+  }
+
+  async getPoints(): Promise<number> {
+    let totalPoints = 0;
+
+    for (const vote of await this.votes) {
+      const voteValue = vote.direction == VoteDirection.UP ? 1 : -1;
+
+      totalPoints += voteValue;
+    }
+
+    return totalPoints;
   }
 }

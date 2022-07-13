@@ -41,6 +41,11 @@ export class PostResolver implements ResolverInterface<Post> {
     return await post.author;
   }
 
+  @FieldResolver()
+  async _pointsField(@Root() post: Post): Promise<number> {
+    return await post.getPoints();
+  }
+
   @Query(() => PaginatedPosts)
   async posts(
     /**The limit will be capped at 50.*/
@@ -123,18 +128,13 @@ export class PostResolver implements ResolverInterface<Post> {
       direction,
     });
 
-    const value = direction == VoteDirection.UP ? 1 : -1;
-
     const post = await Post.findOne(postId);
 
     if (post === undefined) {
       throw Error("Invalid postId");
     }
 
-    const newPoints = post.points + value; 
-
-    post.points = newPoints;
-    post.save();
+    const newPoints = await post.getPoints(); 
 
     return newPoints;
   }
