@@ -5,6 +5,7 @@ import {
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
+  Unique,
 } from "typeorm";
 import { Post } from "./Post";
 import { User } from "./User";
@@ -20,6 +21,7 @@ registerEnumType(VoteDirection, {
 
 @ObjectType()
 @Entity()
+@Unique(["user", "post"])
 export class Vote extends BaseEntity {
   @Field()
   @PrimaryGeneratedColumn()
