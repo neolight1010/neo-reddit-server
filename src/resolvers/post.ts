@@ -79,12 +79,21 @@ export class PostResolver implements ResolverInterface<Post> {
     const slicedPosts = posts.slice(0, limit);
 
     const postsWithUserVote: PostWithUserVote[] = await Promise.all(slicedPosts.map(async (post) => {
-      const userVote = await Vote.findOne({
-        where: {
-          userId,
-          post,
-        },
-      });
+      let userVote: Vote | null;
+
+      if (userId === undefined) {
+        userVote = null;
+      } else {
+        userVote = await Vote.findOne({
+          where: {
+            user: {
+              id: userId,
+            },
+            post,
+          },
+        }) ?? null;
+
+      }
 
       return {
         post,
