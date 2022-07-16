@@ -21,9 +21,18 @@ import { LessThan } from "typeorm";
 import {Vote, VoteDirection} from "../entities/Vote";
 
 @ObjectType()
-class PaginatedPosts {
-  @Field(() => [Post])
-  posts: Post[]
+class PostWithUserVote {
+  @Field(() => Post)
+  post: Post
+
+  @Field(() => VoteDirection, { nullable: true })
+  userVote!: VoteDirection | null;
+}
+
+@ObjectType()
+class PaginatedPostsWithVoteInfo {
+  @Field(() => [PostWithUserVote])
+  postsWithUserVote: PostWithUserVote[]
 
   @Field()
   hasMore: boolean;
@@ -46,13 +55,15 @@ export class PostResolver implements ResolverInterface<Post> {
     return await post.getPoints();
   }
 
-  @Query(() => PaginatedPosts)
+  @Query(() => PaginatedPostsWithVoteInfo)
   async posts(
+    @Ctx() { req }: RegularContext,
     /**The limit will be capped at 50.*/
     @Arg("limit", () => Int, { nullable: true }) limit?: number,
     /**All posts fetched will be older than the cursor's date.*/
     @Arg("cursor", () => Date, { nullable: true }) cursor?: Date
-  ): Promise<PaginatedPosts> {
+  ): Promise<PaginatedPostsWithVoteInfo> {
+    const { userId } = req.session;
     limit = limit ? Math.min(limit, 50) : 50;
 
     const posts = await Post.find({
@@ -65,8 +76,24 @@ export class PostResolver implements ResolverInterface<Post> {
       take: limit + 1, // Fetch one more post.
     });
 
+    const slicedPosts = posts.slice(0, limit);
+
+    const postsWithUserVote: PostWithUserVote[] = await Promise.all(slicedPosts.map(async (post) => {
+      const userVote = await Vote.findOne({
+        where: {
+          userId,
+          post,
+        },
+      });
+
+      return {
+        post,
+        userVote: userVote?.direction ?? null,
+      }
+    }));
+
     return {
-      posts: posts.slice(0, limit), // Slice to get only what was requested.
+      postsWithUserVote,
       hasMore: posts.length === limit + 1,
     };
   }
