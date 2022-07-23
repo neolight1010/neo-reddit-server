@@ -108,7 +108,7 @@ export class PostResolver implements ResolverInterface<Post> {
   }
 
   @Query(() => Post, { nullable: true })
-  async post(@Arg("id", () => Int) id: number): Promise<Post | undefined> {
+  async post(@Arg("id", () => ID) id: string): Promise<Post | undefined> {
     return await Post.findOne(id);
   }
 
@@ -127,7 +127,7 @@ export class PostResolver implements ResolverInterface<Post> {
 
   @Mutation(() => Post, { nullable: true })
   async updatePost(
-    @Arg("id", () => Int) id: number,
+    @Arg("id", () => ID) id: string,
     @Arg("title", { nullable: true }) title: string
   ): Promise<Post | null> {
     const post = await Post.findOne(id);
@@ -140,7 +140,7 @@ export class PostResolver implements ResolverInterface<Post> {
   }
 
   @Mutation(() => Boolean, { nullable: true })
-  async deletePost(@Arg("id", () => Int) id: number): Promise<boolean> {
+  async deletePost(@Arg("id", () => ID) id: string): Promise<boolean> {
     await Post.delete({ id });
     return true;
   }
