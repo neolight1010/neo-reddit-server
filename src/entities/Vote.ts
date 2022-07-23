@@ -28,12 +28,12 @@ export class Vote extends BaseEntity {
   id!: string;
 
   @Field(() => VoteDirection)
-  @Column({type: "enum", enum: VoteDirection})
+  @Column({ type: "enum", enum: VoteDirection })
   direction!: VoteDirection;
 
   @ManyToOne(() => User, (user) => user.votes)
   user!: Promise<User>;
 
-  @ManyToOne(() => Post, (post) => post.votes)
+  @ManyToOne(() => Post, (post) => post.votes, { onDelete: "CASCADE" })
   post!: Promise<Post>;
 }
