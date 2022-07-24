@@ -18,12 +18,12 @@ import { RegularContext } from "../types";
 import { User } from "../entities/User";
 import { isLoggedIn } from "../middleware/isLoggedIn";
 import { LessThan } from "typeorm";
-import {Vote, VoteDirection} from "../entities/Vote";
+import { Vote, VoteDirection } from "../entities/Vote";
 
 @ObjectType()
 class PostWithUserVote {
   @Field(() => Post)
-  post: Post
+  post: Post;
 
   @Field(() => VoteDirection, { nullable: true })
   userVote!: VoteDirection | null;
@@ -32,7 +32,7 @@ class PostWithUserVote {
 @ObjectType()
 class PaginatedPostsWithVoteInfo {
   @Field(() => [PostWithUserVote])
-  postsWithUserVote: PostWithUserVote[]
+  postsWithUserVote: PostWithUserVote[];
 
   @Field()
   hasMore: boolean;
@@ -78,28 +78,30 @@ export class PostResolver implements ResolverInterface<Post> {
 
     const slicedPosts = posts.slice(0, limit);
 
-    const postsWithUserVote: PostWithUserVote[] = await Promise.all(slicedPosts.map(async (post) => {
-      let userVote: Vote | null;
+    const postsWithUserVote: PostWithUserVote[] = await Promise.all(
+      slicedPosts.map(async (post) => {
+        let userVote: Vote | null;
 
-      if (userId === undefined) {
-        userVote = null;
-      } else {
-        userVote = await Vote.findOne({
-          where: {
-            user: {
-              id: userId,
-            },
-            post,
-          },
-        }) ?? null;
+        if (userId === undefined) {
+          userVote = null;
+        } else {
+          userVote =
+            (await Vote.findOne({
+              where: {
+                user: {
+                  id: userId,
+                },
+                post,
+              },
+            })) ?? null;
+        }
 
-      }
-
-      return {
-        post,
-        userVote: userVote?.direction ?? null,
-      }
-    }));
+        return {
+          post,
+          userVote: userVote?.direction ?? null,
+        };
+      })
+    );
 
     return {
       postsWithUserVote,
@@ -140,9 +142,22 @@ export class PostResolver implements ResolverInterface<Post> {
   }
 
   @Mutation(() => Boolean, { nullable: true })
-  async deletePost(@Arg("id", () => ID) id: string): Promise<boolean> {
-    await Post.delete({ id });
-    return true;
+  @UseMiddleware(isLoggedIn)
+  async deletePost(
+    @Arg("id", () => ID) id: string,
+    @Ctx() { req }: RegularContext
+  ): Promise<boolean> {
+    const userId = req.session.userId!;
+
+    const post = await Post.findOne({
+      where: {
+        id,
+        author: { id: userId },
+      },
+    });
+
+    await post?.remove();
+    return post !== undefined;
   }
 
   /**
@@ -170,7 +185,7 @@ export class PostResolver implements ResolverInterface<Post> {
       throw Error("Invalid postId");
     }
 
-    const newPoints = await post.getPoints(); 
+    const newPoints = await post.getPoints();
 
     return newPoints;
   }
