@@ -128,11 +128,15 @@ export class PostResolver implements ResolverInterface<Post> {
   }
 
   @Mutation(() => Post, { nullable: true })
+  @UseMiddleware(isLoggedIn)
   async updatePost(
     @Arg("id", () => ID) id: string,
-    @Arg("title", { nullable: true }) title: string
+    @Arg("title", { nullable: true }) title: string,
+    @Ctx() { req }: RegularContext
   ): Promise<Post | null> {
-    const post = await Post.findOne(id);
+    const { userId } = req.session;
+
+    const post = await Post.findOne({ where: { id, author: { id: userId } } });
 
     if (!post) return null;
 
