@@ -132,6 +132,7 @@ export class PostResolver implements ResolverInterface<Post> {
   async updatePost(
     @Arg("id", () => ID) id: string,
     @Arg("title", { nullable: true }) title: string,
+    @Arg("text", { nullable: true }) text: string,
     @Ctx() { req }: RegularContext
   ): Promise<Post | null> {
     const { userId } = req.session;
@@ -140,7 +141,7 @@ export class PostResolver implements ResolverInterface<Post> {
 
     if (!post) return null;
 
-    await Post.update({ id }, { title });
+    await Post.update({ id }, { title, text });
 
     return post;
   }
