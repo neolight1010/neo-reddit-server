@@ -26,6 +26,7 @@ import { createConnection } from "typeorm";
 import { User } from "./entities/User";
 import { join } from "path";
 import { Vote } from "./entities/Vote";
+import {createUserLoader} from "./loaders/userLoader";
 
 async function main() {
   const app = express();
@@ -79,6 +80,7 @@ async function main() {
       req,
       res,
       redis: redisClient,
+      userLoader: createUserLoader(),
     }),
   });
 

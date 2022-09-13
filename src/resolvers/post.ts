@@ -19,7 +19,6 @@ import { User } from "../entities/User";
 import { isLoggedIn } from "../middleware/isLoggedIn";
 import { LessThan } from "typeorm";
 import { Vote, VoteDirection } from "../entities/Vote";
-import {createUserLoader} from "../loaders/userLoader";
 
 @ObjectType()
 class PostWithUserVote {
@@ -47,8 +46,10 @@ export class PostResolver implements ResolverInterface<Post> {
   }
 
   @FieldResolver()
-  async _authorField(@Root() post: Post) {
-    const userLoader = createUserLoader();
+  async _authorField(
+    @Root() post: Post,
+    @Ctx() { userLoader }: RegularContext
+  ) {
     return userLoader.load(post.authorId.toString());
   }
 
