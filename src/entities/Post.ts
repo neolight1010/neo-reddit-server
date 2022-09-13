@@ -36,6 +36,9 @@ export class Post extends BaseEntity {
   @ManyToOne(() => User, (user) => user.posts)
   author!: Promise<User>;
 
+  @Column()
+  authorId!: number;
+
   @Field(() => User, { name: "author" })
   _authorField!: User;
 
