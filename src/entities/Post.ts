@@ -11,6 +11,7 @@ import {
 } from "typeorm";
 import { Vote, VoteDirection } from "./Vote";
 import { User } from "./User";
+import {createVotesFromPostsLoader} from "../loaders/votesLoader";
 
 @ObjectType()
 @Entity()
@@ -61,10 +62,12 @@ export class Post extends BaseEntity {
     if (author) this.author = Promise.resolve(author);
   }
 
-  async getPoints(): Promise<number> {
+  async getPoints(votesLoader: ReturnType<typeof createVotesFromPostsLoader>): Promise<number> {
     let totalPoints = 0;
 
-    for (const vote of await this.votes) {
+    const votes = await votesLoader.load(this.id);
+
+    for (const vote of votes) {
       const voteValue = vote.direction == VoteDirection.UP ? 1 : -1;
 
       totalPoints += voteValue;

@@ -54,8 +54,8 @@ export class PostResolver implements ResolverInterface<Post> {
   }
 
   @FieldResolver()
-  async _pointsField(@Root() post: Post): Promise<number> {
-    return await post.getPoints();
+  async _pointsField(@Root() post: Post, @Ctx() { votesLoader }: RegularContext): Promise<number> {
+    return await post.getPoints(votesLoader);
   }
 
   @Query(() => PaginatedPostsWithVoteInfo)
@@ -177,7 +177,7 @@ export class PostResolver implements ResolverInterface<Post> {
   async vote(
     @Arg("postId", () => ID) postId: string,
     @Arg("direction", () => VoteDirection) direction: VoteDirection,
-    @Ctx() { req }: RegularContext
+    @Ctx() { req, votesLoader }: RegularContext
   ): Promise<number> {
     const { userId } = req.session;
 
@@ -193,7 +193,7 @@ export class PostResolver implements ResolverInterface<Post> {
       throw Error("Invalid postId");
     }
 
-    const newPoints = await post.getPoints();
+    const newPoints = await post.getPoints(votesLoader);
 
     return newPoints;
   }
