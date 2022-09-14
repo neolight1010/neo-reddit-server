@@ -9,6 +9,7 @@ export const createVotesFromPostsLoader = (): DataLoader<Post["id"], Vote[]> =>
       where: {
         post: { id: In(postIds.slice()) },
       },
+      relations: ["post"],
     });
 
     const postIdToVotes: Record<Post["id"], Vote[]> = {};
