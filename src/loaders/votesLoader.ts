@@ -13,12 +13,14 @@ export const createVotesFromPostsLoader = (): DataLoader<Post["id"], Vote[]> =>
 
     const postIdToVotes: Record<Post["id"], Vote[]> = {};
 
+    for (const postId of postIds) {
+      postIdToVotes[postId] = [];
+    }
+
     for (const vote of votes) {
       const postId = (await vote.post).id;
 
-      if (postIdToVotes[postId] !== undefined) {
-        postIdToVotes[postId].push(vote);
-      }
+      postIdToVotes[postId].push(vote);
     }
 
     const orderedVotes: Vote[][] = postIds.map(
