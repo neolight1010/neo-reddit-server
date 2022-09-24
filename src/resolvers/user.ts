@@ -12,7 +12,7 @@ import {
 } from "type-graphql";
 import { UsernamePasswordInput } from "../graphql_types/input_types";
 import { UserResponse } from "../graphql_types/object_types";
-import { FORGOT_PASSWORD_PREFIX, __sessionCookie__ } from "../constants";
+import { CORS_ORIGIN, FORGOT_PASSWORD_PREFIX, __sessionCookie__ } from "../constants";
 import validateRegister from "../utils/validateRegister";
 import sendEmail from "../utils/sendEmail";
 import { v4 } from "uuid";
@@ -92,7 +92,7 @@ export class UserResolver implements ResolverInterface<User> {
             1000 * 60 * 60 * 24 * 3
         );
 
-        const resetPasswordURL = `http://localhost:3000/change-password/${token}`;
+        const resetPasswordURL = `${CORS_ORIGIN}/change-password/${token}`;
         const anchorTag = `<a href=${resetPasswordURL}>Reset Password</a>`;
 
         await sendEmail({ to: email, html: anchorTag });
