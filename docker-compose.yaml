@@ -17,7 +17,9 @@ services:
       - "6379:6379"
 
   server:
-    build: .
+    build:
+      context: .
+      target: "base"
     command: "yarn dev"
     environment:
       PORT: 4000

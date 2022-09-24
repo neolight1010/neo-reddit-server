@@ -1,4 +1,4 @@
-FROM node:17-alpine3.12
+FROM node:17-alpine3.12 as base
 
 # Dependencies for node-gyp
 RUN apk add python3 make gcc g++
@@ -9,5 +9,9 @@ RUN yarn install
 
 COPY . .
 RUN yarn build
+
+FROM base as prod
+
+ENV NODE_ENV production
 
 CMD ["yarn", "start"]
