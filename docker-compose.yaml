@@ -27,7 +27,7 @@ services:
       DB_NAME: neo-reddit-db
       DB_USER: postgres
       DB_PASSWORD: postgres
-      REDIS_HOST: redis
+      REDIS_URL: redis
       SESSION_SECRET: my_secret
     depends_on:
       - postgres
