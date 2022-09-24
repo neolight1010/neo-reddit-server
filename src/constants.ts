@@ -17,4 +17,6 @@ export const __redisUrl__ = process.env.REDIS_URL;
 export const __sessionSecret__ = process.env.SESSION_SECRET;
 export const __sessionCookie__ = "qid";
 
+export const CORS_ORIGIN = process.env.CORS_ORIGIN;
+
 export const FORGOT_PASSWORD_PREFIX = "forgot-password:";

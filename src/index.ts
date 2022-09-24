@@ -1,5 +1,6 @@
 import "reflect-metadata";
 import {
+  CORS_ORIGIN,
   __dbHost__,
   __dbName__,
   __dbPassword__,
@@ -7,7 +8,7 @@ import {
   __debug__,
   __port__,
   __prod__,
-  __redisHost__,
+  __redisUrl__,
   __sessionCookie__,
   __sessionSecret__,
 } from "./constants";
@@ -34,7 +35,7 @@ async function main() {
 
   // Set up ExpressSession and Redis.
   const RedisStore = connectRedis(session);
-  const redisClient = new Redis({ host: __redisHost__ });
+  const redisClient = new Redis({ host: __redisUrl__ });
 
   app.use(
     session({
@@ -90,7 +91,7 @@ async function main() {
     app,
     cors: {
       credentials: true,
-      origin: "http://localhost:3000",
+      origin: CORS_ORIGIN,
     },
   });
 
