@@ -35,7 +35,7 @@ async function main() {
 
   // Set up ExpressSession and Redis.
   const RedisStore = connectRedis(session);
-  const redisClient = new Redis({ host: __redisUrl__ });
+  const redisClient = new Redis(__redisUrl__);
 
   app.use(
     session({
