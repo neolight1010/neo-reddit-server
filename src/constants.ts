@@ -7,10 +7,7 @@ if (__debug__) {
 
 export const __port__ = process.env.PORT;
 
-export const __dbHost__ = process.env.DB_HOST;
-export const __dbName__ = process.env.DB_NAME;
-export const __dbUser__ = process.env.DB_USER;
-export const __dbPassword__ = process.env.DB_PASSWORD;
+export const __dbUrl__ = process.env.DATABASE_URL;
 
 export const __redisUrl__ = process.env.REDIS_URL;
 

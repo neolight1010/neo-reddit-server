@@ -1,10 +1,7 @@
 import "reflect-metadata";
 import {
   CORS_ORIGIN,
-  __dbHost__,
-  __dbName__,
-  __dbPassword__,
-  __dbUser__,
+  __dbUrl__,
   __debug__,
   __port__,
   __prod__,
@@ -59,10 +56,7 @@ async function main() {
   // Set up TypeORM
   const conn = await createConnection({
     type: "postgres",
-    host: __dbHost__,
-    database: __dbName__,
-    username: __dbUser__,
-    password: __dbPassword__,
+    url: __dbUrl__,
     logging: true,
     synchronize: __debug__,
     entities: [User, Post, Vote],
