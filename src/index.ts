@@ -2,7 +2,6 @@ import "reflect-metadata";
 import {
   CORS_ORIGIN,
   __dbUrl__,
-  __debug__,
   __port__,
   __prod__,
   __redisUrl__,
@@ -58,7 +57,7 @@ async function main() {
     type: "postgres",
     url: __dbUrl__,
     logging: true,
-    synchronize: __debug__,
+    synchronize: false,
     entities: [User, Post, Vote],
     migrations: [join(__dirname, "migrations", "*")],
   });
