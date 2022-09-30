@@ -33,6 +33,8 @@ async function main() {
   const RedisStore = connectRedis(session);
   const redisClient = new Redis(__redisUrl__);
 
+  app.set("trust proxy", 1);
+
   app.use(
     session({
       name: __sessionCookie__,
