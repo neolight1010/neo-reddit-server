@@ -179,16 +179,27 @@ export class PostResolver implements ResolverInterface<Post> {
   ): Promise<number> {
     const { userId } = req.session;
 
-    await Vote.insert({
-      post: () => postId,
-      user: () => userId!.toString(),
-      direction,
-    });
-
     const post = await Post.findOne(postId);
-
     if (post === undefined) {
       throw Error("Invalid postId");
+    }
+
+    const vote = await Vote.findOne({
+      where: {
+        post: postId,
+        user: userId!.toString(),
+      },
+    });
+
+    if (vote === undefined) {
+      Vote.insert({
+        post: () => postId,
+        user: () => userId!.toString(),
+        direction: direction,
+      });
+    } else {
+      vote.direction = direction;
+      await vote.save();
     }
 
     const newPoints = await post.getPoints(votesLoader);
