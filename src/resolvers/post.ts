@@ -160,12 +160,7 @@ export class PostResolver implements ResolverInterface<Post> {
   ): Promise<boolean> {
     const userId = req.session.userId!;
 
-    const post = await Post.findOne({
-      where: {
-        id,
-        author: { id: userId },
-      },
-    });
+    const post = await Post.findOne({ where: { id, authorId: userId } });
 
     await post?.remove();
     return post !== undefined;
