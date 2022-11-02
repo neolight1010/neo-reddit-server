@@ -206,4 +206,38 @@ export class PostResolver implements ResolverInterface<Post> {
 
     return newPoints;
   }
+
+  /**
+   * Deletes a vote and returns the new number of points of the post.
+   */
+  @UseMiddleware(isLoggedIn)
+  @Mutation(() => Int, { nullable: true })
+  async deleteVote(
+    @Arg("postId", () => ID) postId: string,
+    @Ctx() { req, votesLoader }: RegularContext
+  ): Promise<number | null> {
+    const { userId } = req.session;
+
+    const post = await Post.findOne(postId);
+    if (post === undefined) {
+      throw Error("Post not found.");
+    }
+
+    const vote = await Vote.findOne({
+      where: {
+        post: postId,
+        user: userId!.toString(),
+      },
+    });
+
+    if (vote === undefined) {
+      return null;
+    }
+
+    await vote.remove();
+
+    const newPoints = await post.getPoints(votesLoader);
+
+    return newPoints;
+  }
 }
