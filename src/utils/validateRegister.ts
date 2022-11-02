@@ -1,6 +1,6 @@
-import {UsernamePasswordInput} from "../graphql_types/input_types";
-import {FieldError} from "../graphql_types/object_types";
-import validatePassword from "./validatePassword"
+import { UsernamePasswordInput } from "../graphql_types/input_types";
+import { FieldError } from "../graphql_types/object_types";
+import validatePassword from "./validatePassword";
 
 export default function validateRegister(
   registerInfo: UsernamePasswordInput

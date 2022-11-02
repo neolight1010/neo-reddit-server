@@ -1,4 +1,4 @@
-import {Field, ObjectType, registerEnumType} from "type-graphql";
+import { Field, ObjectType, registerEnumType } from "type-graphql";
 import {
   BaseEntity,
   Column,
@@ -17,7 +17,7 @@ export enum VoteDirection {
 
 registerEnumType(VoteDirection, {
   name: "VoteDirection",
-})
+});
 
 @ObjectType()
 @Entity()

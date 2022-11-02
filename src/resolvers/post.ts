@@ -54,7 +54,10 @@ export class PostResolver implements ResolverInterface<Post> {
   }
 
   @FieldResolver()
-  async _pointsField(@Root() post: Post, @Ctx() { votesLoader }: RegularContext): Promise<number> {
+  async _pointsField(
+    @Root() post: Post,
+    @Ctx() { votesLoader }: RegularContext
+  ): Promise<number> {
     return await post.getPoints(votesLoader);
   }
 
