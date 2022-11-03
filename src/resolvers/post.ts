@@ -167,16 +167,16 @@ export class PostResolver implements ResolverInterface<Post> {
   }
 
   /**
-   * Performs a vote with the given direction and returns the new number of
-   * points of the post.
+   * Performs a vote with the given direction and returns the ID of the new
+   * or modified vote.
    */
   @UseMiddleware(isLoggedIn)
-  @Mutation(() => Int)
+  @Mutation(() => ID)
   async vote(
     @Arg("postId", () => ID) postId: string,
     @Arg("direction", () => VoteDirection) direction: VoteDirection,
-    @Ctx() { req, votesLoader }: RegularContext
-  ): Promise<number> {
+    @Ctx() { req }: RegularContext
+  ): Promise<string> {
     const { userId } = req.session;
 
     const post = await Post.findOne(postId);
@@ -191,31 +191,37 @@ export class PostResolver implements ResolverInterface<Post> {
       },
     });
 
+    let voteId = "";
+
     if (vote === undefined) {
-      Vote.insert({
-        post: () => postId,
-        user: () => userId!.toString(),
-        direction: direction,
-      });
+      const newVote = new Vote();
+
+      newVote.post = Promise.resolve(post);
+      newVote.user = User.findOneOrFail(userId);
+      newVote.direction = direction;
+
+      await newVote.save();
+
+      voteId = newVote.id;
     } else {
       vote.direction = direction;
       await vote.save();
+
+      voteId = vote.id;
     }
 
-    const newPoints = await post.getPoints(votesLoader);
-
-    return newPoints;
+    return voteId;
   }
 
   /**
    * Deletes a vote and returns the new number of points of the post.
    */
   @UseMiddleware(isLoggedIn)
-  @Mutation(() => Int, { nullable: true })
+  @Mutation(() => ID, { nullable: true })
   async deleteVote(
     @Arg("postId", () => ID) postId: string,
-    @Ctx() { req, votesLoader }: RegularContext
-  ): Promise<number | null> {
+    @Ctx() { req }: RegularContext
+  ): Promise<string | null> {
     const { userId } = req.session;
 
     const post = await Post.findOne(postId);
@@ -236,8 +242,6 @@ export class PostResolver implements ResolverInterface<Post> {
 
     await vote.remove();
 
-    const newPoints = await post.getPoints(votesLoader);
-
-    return newPoints;
+    return vote.id;
   }
 }
