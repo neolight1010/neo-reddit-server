@@ -94,9 +94,7 @@ export class PostResolver implements ResolverInterface<Post> {
           userVote =
             (await Vote.findOne({
               where: {
-                user: {
-                  id: userId,
-                },
+                userId: userId.toString(),
                 post,
               },
             })) ?? null;
@@ -187,7 +185,7 @@ export class PostResolver implements ResolverInterface<Post> {
     const vote = await Vote.findOne({
       where: {
         post: postId,
-        user: userId!.toString(),
+        userId: userId!.toString(),
       },
     });
 
@@ -197,7 +195,7 @@ export class PostResolver implements ResolverInterface<Post> {
       const newVote = new Vote();
 
       newVote.post = Promise.resolve(post);
-      newVote.user = User.findOneOrFail(userId);
+      newVote.userId = userId!.toString();
       newVote.direction = direction;
 
       await newVote.save();
@@ -232,7 +230,7 @@ export class PostResolver implements ResolverInterface<Post> {
     const vote = await Vote.findOne({
       where: {
         post: postId,
-        user: userId!.toString(),
+        userId: userId!.toString(),
       },
     });
 
